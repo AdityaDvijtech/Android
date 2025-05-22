@@ -1,62 +1,90 @@
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import api from '../../lib/api';
+import type { Project } from '../../lib/types';
 
 export default function ProjectsScreen() {
-  const projects = [
-    {
-      id: 1,
-      title: 'Rural Roads Initiative',
-      description: 'Secured funding for 250km of rural roads connecting 60+ villages to main highways.',
-      status: 'In Progress',
-      completion: '75%',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200',
-    },
-    {
-      id: 2,
-      title: 'Digital Classrooms',
-      description: 'Established 15 digital classrooms in government schools benefiting over 5,000 students.',
-      status: 'Completed',
-      completion: '100%',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200',
-    },
-    {
-      id: 3,
-      title: 'Healthcare Centers',
-      description: 'Setting up 5 new healthcare centers in remote areas.',
-      status: 'Planning',
-      completion: '25%',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200',
-    },
-  ];
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.getProjects();
+      setProjects(data);
+    } catch (err) {
+      console.error('Error loading projects:', err);
+      setError('Failed to load projects. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text>Loading projects...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <ScrollView style={{ flex: 1, backgroundColor: '#FFF7E0' }}>
       <View style={{ padding: 16 }}>
-        {projects.map((project) => (
-          <View key={project.id} style={styles.projectCard}>
-            <Image source={{ uri: project.imageUrl }} style={styles.projectImage} />
-            <View style={styles.projectContent}>
-              <Text style={styles.projectTitle}>{project.title}</Text>
-              <Text style={styles.projectDescription}>{project.description}</Text>
-              <View style={styles.projectStatus}>
-                <Text style={[
-                  styles.statusBadge,
-                  { backgroundColor: project.status === 'Completed' ? '#D1FAE5' : project.status === 'In Progress' ? '#DBEAFE' : '#FEF3C7' }
-                ]}>
-                  {project.status}
-                </Text>
-                <Text style={styles.completionText}>Completion: {project.completion}</Text>
+        {projects.length > 0 ? (
+          projects.map((project) => (
+            <LinearGradient key={project.id} colors={['#FFF7E0', '#FFD580']} style={styles.projectCard}>
+              <Image source={{ uri: project.imageUrl }} style={styles.projectImage} />
+              <View style={styles.projectContent}>
+                <Text style={styles.projectTitle}>{project.title}</Text>
+                <Text style={styles.projectDescription}>{project.description}</Text>
+                <View style={styles.projectStatus}>
+                  <Text style={[
+                    styles.statusBadge,
+                    { backgroundColor: project.status === 'completed' ? '#D1FAE5' : project.status === 'ongoing' ? '#DBEAFE' : '#FEF3C7' }
+                  ]}>
+                    {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                  </Text>
+                  <Text style={styles.completionText}>Completion: {project.completion}%</Text>
+                </View>
               </View>
-            </View>
-          </View>
-        ))}
+            </LinearGradient>
+          ))
+        ) : (
+          <Text style={styles.noProjects}>No projects available</Text>
+        )}
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    textAlign: 'center',
+  },
   projectCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
@@ -97,5 +125,11 @@ const styles = StyleSheet.create({
   completionText: {
     fontSize: 12,
     color: '#666',
+  },
+  noProjects: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 14,
+    marginTop: 24,
   },
 }); 

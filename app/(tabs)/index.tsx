@@ -1,252 +1,271 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
 
 export default function HomeScreen() {
-  // Static data for demonstration
-  const projects = [
-    {
-      id: 1,
-      title: 'Rural Roads Initiative',
-      description: 'Secured funding for 250km of rural roads connecting 60+ villages to main highways.',
-      imageUrl: require('@/assets/images/icon.png'),
-    },
-    {
-      id: 2,
-      title: 'Digital Classrooms',
-      description: 'Established 15 digital classrooms in government schools benefiting over 5,000 students.',
-      imageUrl: require('@/assets/images/icon.png'),
-    },
-  ];
-  const events = [
-    {
-      id: 1,
-      title: 'Constituency Meet',
-      location: 'Village Hall',
-      date: '2024-06-10T18:00:00Z',
-    },
-    {
-      id: 2,
-      title: 'Health Camp',
-      location: 'Community Center',
-      date: '2024-06-15T10:00:00Z',
-    },
-  ];
+  const { user } = useAuth();
+  const [language, setLanguage] = useState('en');
+  const { t, i18n } = useTranslation();
+
+  const handleLanguageSwitch = () => {
+    const newLang = language === 'en' ? 'mr' : 'en';
+    setLanguage(newLang);
+    i18n.changeLanguage(newLang);
+  };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {/* Hero Banner */}
-      <View style={styles.heroContainer}>
-        <Image
-          source={require('@/assets/images/splash-icon.png')}
-          style={styles.heroImage}
-          onError={(e) => console.log('Hero image loading error:', e.nativeEvent.error)}
-        />
-        <View style={styles.heroOverlay}>
-          <Text style={styles.heroTitle}>Gopichand Padalkar</Text>
-          <Text style={styles.heroSubtitle}>Member of Parliament - Working for your future</Text>
-        </View>
-      </View>
-
-      {/* Latest Updates */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Latest Updates</Text>
-        {projects.map((project) => (
-          <View key={project.id} style={styles.projectRow}>
-            <Image 
-              source={project.imageUrl} 
-              style={styles.projectImage}
-              onError={(e) => console.log('Project image loading error:', e.nativeEvent.error)}
+    <ScrollView style={{ flex: 1, backgroundColor: '#FFF7E0' }}>
+      {/* Language Switcher Button */}
+      {/* <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 12 }}>
+        <Pressable onPress={handleLanguageSwitch} style={{ backgroundColor: '#FFD580', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6 }}>
+          <Text style={{ color: '#92400E', fontWeight: 'bold' }}>{language === 'en' ? 'मराठी' : 'English'}</Text>
+        </Pressable>
+      </View> */}
+      {/* Gradient Top Section with Politician Image */}
+      <LinearGradient
+        colors={['#FFE259', '#FFA751']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradientTop}
+      >
+        <View style={styles.topContent}>
+          <LinearGradient
+            colors={['#FFA751', '#FFE259']}
+            style={styles.photoBadge}
+          >
+            <Image
+              source={require('../../assets/images/gopichand.jpg')}
+              style={styles.politicianImage}
             />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.projectTitle}>{project.title}</Text>
-              <Text style={styles.projectDesc}>{project.description}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
+          </LinearGradient>
+          <Text style={styles.welcomeTitle}>{t('welcome', { name: user?.name || t('friend') })}</Text>
+          <Text style={styles.welcomeSubtitle}>{t('subtitle')}</Text>
+        </View>
+      </LinearGradient>
 
-      {/* Quick Links */}
-      <View style={styles.card}>
+      {/* Stats Overview with Gradient Card */}
+      <LinearGradient
+        colors={['#FFF7E0', '#FFD580']}
+        style={styles.card}
+      >
+        <Text style={styles.cardTitle}>Constituency Overview</Text>
+        <View style={styles.statsGrid}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>15</Text>
+            <Text style={styles.statLabel}>Active Projects</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>89%</Text>
+            <Text style={styles.statLabel}>Approval Rating</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>1.2M</Text>
+            <Text style={styles.statLabel}>Constituents</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>45</Text>
+            <Text style={styles.statLabel}>Initiatives</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      {/* Quick Links with Gradient Card */}
+      <LinearGradient
+        colors={['#FFF7E0', '#FFD580']}
+        style={styles.card}
+      >
         <Text style={styles.cardTitle}>Quick Links</Text>
         <View style={styles.quickLinksGrid}>
           <Link href="/complaints" asChild>
-            <TouchableOpacity style={styles.quickLink}>
+            <Pressable style={({ pressed }) => [styles.quickLink, pressed && { backgroundColor: '#FFE259', transform: [{ scale: 0.97 }] }] }>
               <Text style={styles.quickLinkIcon}>📝</Text>
               <Text style={styles.quickLinkText}>Submit Complaint</Text>
-            </TouchableOpacity>
+            </Pressable>
           </Link>
           <Link href="/projects" asChild>
-            <TouchableOpacity style={styles.quickLink}>
+            <Pressable style={({ pressed }) => [styles.quickLink, pressed && { backgroundColor: '#FFE259', transform: [{ scale: 0.97 }] }] }>
               <Text style={styles.quickLinkIcon}>🎯</Text>
               <Text style={styles.quickLinkText}>Ongoing Projects</Text>
-            </TouchableOpacity>
+            </Pressable>
           </Link>
           <Link href="/about" asChild>
-            <TouchableOpacity style={styles.quickLink}>
+            <Pressable style={({ pressed }) => [styles.quickLink, pressed && { backgroundColor: '#FFE259', transform: [{ scale: 0.97 }] }] }>
               <Text style={styles.quickLinkIcon}>🏆</Text>
               <Text style={styles.quickLinkText}>Achievements</Text>
-            </TouchableOpacity>
+            </Pressable>
           </Link>
           <Link href="/news" asChild>
-            <TouchableOpacity style={styles.quickLink}>
+            <Pressable style={({ pressed }) => [styles.quickLink, pressed && { backgroundColor: '#FFE259', transform: [{ scale: 0.97 }] }] }>
               <Text style={styles.quickLinkIcon}>📰</Text>
               <Text style={styles.quickLinkText}>Latest News</Text>
-            </TouchableOpacity>
+            </Pressable>
           </Link>
         </View>
-      </View>
+      </LinearGradient>
 
-      {/* Upcoming Events */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Upcoming Events</Text>
-        {events.length > 0 ? events.map((event, idx) => (
-          <View key={event.id} style={[styles.eventRow, idx < events.length - 1 && styles.eventRowBorder]}> 
-            <View style={styles.eventDateBox}>
-              <Text style={styles.eventMonth}>{new Date(event.date).toLocaleString('default', { month: 'short' }).toUpperCase()}</Text>
-              <Text style={styles.eventDay}>{new Date(event.date).getDate()}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.eventTitle}>{event.title}</Text>
-              <Text style={styles.eventDesc}>{event.location}, {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-            </View>
+      {/* Recent Activities with Gradient Card */}
+      <LinearGradient
+        colors={['#FFF7E0', '#FFD580']}
+        style={styles.card}
+      >
+        <Text style={styles.cardTitle}>Recent Activities</Text>
+        <View style={styles.activityList}>
+          <View style={styles.activityItem}>
+            <Text style={styles.activityDate}>Today</Text>
+            <Text style={styles.activityText}>Inaugurated new community center in Sector 5</Text>
           </View>
-        )) : (
-          <Text style={styles.noEvents}>No upcoming events</Text>
-        )}
-      </View>
+          <View style={styles.activityItem}>
+            <Text style={styles.activityDate}>Yesterday</Text>
+            <Text style={styles.activityText}>Attended education summit at City Hall</Text>
+          </View>
+          <View style={styles.activityItem}>
+            <Text style={styles.activityDate}>2 days ago</Text>
+            <Text style={styles.activityText}>Launched new healthcare initiative</Text>
+          </View>
+        </View>
+      </LinearGradient>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  heroContainer: {
+  gradientTop: {
+    paddingBottom: 12,
+    paddingTop: 32,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    marginBottom: 8,
+    elevation: 4,
+    shadowColor: '#FFA751',
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
     position: 'relative',
-    height: 200,
-    marginBottom: 24,
   },
-  heroImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 16,
+  topContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
-  heroOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: 16,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+  photoBadge: {
+    padding: 4,
+    borderRadius: 70,
+    marginBottom: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FFA751',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
-  heroTitle: {
-    color: '#fff',
+  politicianImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
+    borderColor: '#FFF7E0',
+  },
+  welcomeTitle: {
     fontSize: 22,
     fontWeight: 'bold',
+    color: '#B45309',
+    marginBottom: 2,
+    marginTop: 2,
+    textAlign: 'center',
   },
-  heroSubtitle: {
-    color: '#fff',
-    fontSize: 14,
-    marginTop: 4,
+  welcomeSubtitle: {
+    fontSize: 15,
+    color: '#92400E',
+    marginBottom: 2,
+    textAlign: 'center',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
-    marginBottom: 20,
-    marginHorizontal: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    marginBottom: 18,
+    marginHorizontal: 10,
     elevation: 2,
+    shadowColor: '#FFA751',
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontWeight: '700',
+    marginBottom: 10,
+    color: '#92400E',
   },
-  projectRow: {
+  statsGrid: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-    gap: 12,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
   },
-  projectImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
+  statItem: {
+    width: '48%',
+    backgroundColor: '#FFE259',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  projectTitle: {
-    fontSize: 15,
-    fontWeight: '500',
+  statNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#92400E',
+    marginBottom: 2,
   },
-  projectDesc: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  statLabel: {
+    fontSize: 13,
+    color: '#78350F',
+    textAlign: 'center',
   },
   quickLinksGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 10,
   },
   quickLink: {
     width: '48%',
-    backgroundColor: '#FFF7E0',
-    borderRadius: 10,
+    backgroundColor: '#FFE259',
+    borderRadius: 12,
     alignItems: 'center',
-    padding: 14,
+    paddingVertical: 18,
     marginBottom: 8,
+    shadowColor: '#FFA751',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1,
   },
   quickLinkIcon: {
-    fontSize: 24,
+    fontSize: 28,
     marginBottom: 4,
+    color: '#92400E',
   },
   quickLinkText: {
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  eventRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  eventRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  eventDateBox: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#FFF7E0',
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  eventMonth: {
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#666',
-  },
-  eventDay: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  eventTitle: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  eventDesc: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  noEvents: {
+    color: '#78350F',
     textAlign: 'center',
-    color: '#666',
-    fontStyle: 'italic',
+  },
+  activityList: {
+    gap: 8,
+  },
+  activityItem: {
+    backgroundColor: '#FFE259',
+    borderRadius: 10,
+    padding: 12,
+  },
+  activityDate: {
+    fontSize: 11,
+    color: '#92400E',
+    marginBottom: 2,
+  },
+  activityText: {
+    fontSize: 13,
+    color: '#78350F',
+    fontWeight: '500',
   },
 }); 

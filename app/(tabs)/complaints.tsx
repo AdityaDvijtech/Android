@@ -1,25 +1,45 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
+import type { Complaint } from '../../lib/types';
 
 export default function ComplaintsScreen() {
-  const [complaints, setComplaints] = useState([
-    {
-      id: 1,
-      title: 'Water Supply Issue',
-      description: 'There has been no water supply in our area for 3 days.',
-      status: 'pending',
-      createdAt: '2024-06-01T10:00:00Z',
-      adminResponse: null,
-    },
-    {
-      id: 2,
-      title: 'Street Light Not Working',
-      description: 'The main street light is not working for a week.',
-      status: 'completed',
-      createdAt: '2024-05-25T18:00:00Z',
-      adminResponse: 'Issue resolved. Thank you for reporting.',
-    },
-  ]);
+  const { user } = useAuth();
+  const router = useRouter();
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadComplaints = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.getComplaints();
+      setComplaints(data);
+    } catch (err) {
+      setError('Failed to load complaints. Please try again later.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadComplaints();
+  }, []);
+
+  // Auto-refresh when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      loadComplaints();
+    }, [])
+  );
 
   const getStatusBadge = (status: string) => {
     if (status === 'pending') {
@@ -31,21 +51,39 @@ export default function ComplaintsScreen() {
     }
   };
 
-  return (
-    <ScrollView style={{ flex: 1, backgroundColor: 'transparent' }}>
-      <View style={{ padding: 16 }}>
-        {/* Login Required Message */}
-        <View style={[styles.card, { backgroundColor: '#FEF9C3', borderColor: '#FDE68A', borderWidth: 1 }]}> 
-          <Text style={{ color: '#B45309', fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>
-            Please login to submit or track complaints
-          </Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Login Now</Text>
-          </TouchableOpacity>
-        </View>
+  if (loading && !refreshing) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text>Loading complaints...</Text>
+      </View>
+    );
+  }
 
-        {/* User Complaints List */}
-        <View style={styles.card}>
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: '#FFF7E0' }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {user && (
+        <TouchableOpacity
+          style={styles.submitNewButton}
+          onPress={() => router.push('./ComplaintFormScreen')}
+        >
+          <Text style={styles.submitNewButtonText}>Submit New Complaint</Text>
+        </TouchableOpacity>
+      )}
+      <View style={{ padding: 16 }}>
+        <LinearGradient colors={['#FFF7E0', '#FFD580']} style={styles.card}>
           <Text style={styles.cardTitle}>Your Complaints</Text>
           {complaints.length > 0 ? complaints.map((complaint) => (
             <View key={complaint.id} style={styles.complaintItem}>
@@ -67,23 +105,45 @@ export default function ComplaintsScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          )) : (
+          )) :
             <Text style={styles.noComplaints}>You haven't submitted any complaints yet</Text>
-          )}
-        </View>
+          }
+        </LinearGradient>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    textAlign: 'center',
+  },
+  submitNewButton: {
+    backgroundColor: '#F59E0B',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    margin: 16,
+    marginBottom: 0,
+  },
+  submitNewButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
+    shadowColor: '#FFA751',
+    shadowOpacity: 0.10,
     shadowRadius: 8,
     elevation: 2,
   },
@@ -92,25 +152,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
   },
-  button: {
-    backgroundColor: '#F59E0B',
-    borderRadius: 8,
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
   complaintItem: {
     borderWidth: 1,
     borderColor: '#F3F4F6',
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
-    backgroundColor: '#FAFAFA',
   },
   complaintTitle: {
     fontSize: 15,

@@ -1,0 +1,22 @@
+{
+  "welcome": "Welcome, {{name}}!",
+  "friend": "Friend",
+  "subtitle": "Your Concerns, My Priority",
+  "constituency_overview": "Constituency Overview",
+  "active_projects": "Active Projects",
+  "approval_rating": "Approval Rating",
+  "constituents": "Constituents",
+  "initiatives": "Initiatives",
+  "quick_links": "Quick Links",
+  "submit_complaint": "Submit Complaint",
+  "ongoing_projects": "Ongoing Projects",
+  "achievements": "Achievements",
+  "latest_news": "Latest News",
+  "recent_activities": "Recent Activities",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "days_ago": "{{count}} days ago",
+  "inaugurated_center": "Inaugurated new community center in Sector 5",
+  "attended_summit": "Attended education summit at City Hall",
+  "launched_healthcare": "Launched new healthcare initiative"
+} 

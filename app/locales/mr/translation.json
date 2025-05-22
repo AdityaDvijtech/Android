@@ -1,0 +1,22 @@
+{
+  "welcome": "स्वागत आहे, {{name}}!",
+  "friend": "मित्र",
+  "subtitle": "आपल्या समस्या, माझी प्राधान्य",
+  "constituency_overview": "मतदारसंघाचा आढावा",
+  "active_projects": "सक्रिय प्रकल्प",
+  "approval_rating": "मान्यता रेटिंग",
+  "constituents": "मतदार",
+  "initiatives": "उपक्रम",
+  "quick_links": "द्रुत दुवे",
+  "submit_complaint": "तक्रार नोंदवा",
+  "ongoing_projects": "चालू प्रकल्प",
+  "achievements": "सिद्धी",
+  "latest_news": "ताज्या बातम्या",
+  "recent_activities": "अलीकडील क्रियाकलाप",
+  "today": "आज",
+  "yesterday": "काल",
+  "days_ago": "{{count}} दिवसांपूर्वी",
+  "inaugurated_center": "सेक्टर ५ मध्ये नवीन समुदाय केंद्राचे उद्घाटन",
+  "attended_summit": "सिटी हॉलमध्ये शिक्षण परिषदेस उपस्थित",
+  "launched_healthcare": "नवीन आरोग्य उपक्रम सुरू केला"
+} 

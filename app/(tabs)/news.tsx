@@ -1,62 +1,95 @@
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import api from '../../lib/api';
+import type { News } from '../../lib/types';
 
 export default function NewsScreen() {
-  const news = [
-    {
-      id: 1,
-      title: 'New Healthcare Center Inaugurated',
-      description: 'A state-of-the-art healthcare center was inaugurated in the rural area, providing essential medical services to over 10,000 residents.',
-      date: '2024-06-01',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200',
-    },
-    {
-      id: 2,
-      title: 'Digital Education Initiative Launched',
-      description: 'The constituency launched a new digital education initiative, providing tablets and internet connectivity to 20 government schools.',
-      date: '2024-05-28',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200',
-    },
-    {
-      id: 3,
-      title: 'Road Development Project Completed',
-      description: 'The major road development project connecting five villages to the main highway has been successfully completed ahead of schedule.',
-      date: '2024-05-25',
-      imageUrl: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200',
-    },
-  ];
+  const [news, setNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadNews();
+  }, []);
+
+  const loadNews = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.getNews();
+      setNews(data);
+    } catch (err) {
+      console.error('Error loading news:', err);
+      setError('Failed to load news. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text>Loading news...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <ScrollView style={{ flex: 1, backgroundColor: '#FFF7E0' }}>
       <View style={{ padding: 16 }}>
-        {news.map((item) => (
-          <View key={item.id} style={styles.newsCard}>
-            <Image source={{ uri: item.imageUrl }} style={styles.newsImage} />
-            <View style={styles.newsContent}>
-              <Text style={styles.newsDate}>{new Date(item.date).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}</Text>
-              <Text style={styles.newsTitle}>{item.title}</Text>
-              <Text style={styles.newsDescription}>{item.description}</Text>
-            </View>
-          </View>
-        ))}
+        {news.length > 0 ? (
+          news.map((item) => (
+            <LinearGradient key={item.id} colors={['#FFF7E0', '#FFD580']} style={styles.newsCard}>
+              <Image source={{ uri: item.imageUrl }} style={styles.newsImage} />
+              <View style={styles.newsContent}>
+                <Text style={styles.newsDate}>
+                  {new Date(item.createdAt).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </Text>
+                <Text style={styles.newsTitle}>{item.title}</Text>
+                <Text style={styles.newsDescription}>{item.content}</Text>
+              </View>
+            </LinearGradient>
+          ))
+        ) : (
+          <Text style={styles.noNews}>No news available</Text>
+        )}
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    textAlign: 'center',
+  },
   newsCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: '#FFA751',
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
   },
   newsImage: {
     width: '100%',
@@ -79,5 +112,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#444',
     lineHeight: 20,
+  },
+  noNews: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 14,
+    marginTop: 24,
   },
 }); 

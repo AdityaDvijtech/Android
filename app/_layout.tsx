@@ -1,39 +1,35 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { api, User } from '../lib/api';
+import React from 'react';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
-export default function RootLayout() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+function RootNavigator() {
+  const { user, loading } = useAuth();
+  console.log('Auth state:', { user, loading });
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  if (loading) return null; // Or a loading spinner
 
-  const checkAuth = async () => {
-    try {
-      const currentUser = await api.getCurrentUser();
-      setUser(currentUser);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return null; // Or a loading screen
+  if (!user) {
+    return (
+      <Stack>
+        <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
+      </Stack>
+    );
   }
 
   return (
-    <>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="register" options={{ headerShown: false }} />
-      </Stack>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+
+export default function Layout() {
+  return (
+    <AuthProvider>
+      <RootNavigator />
       <StatusBar style="light" />
-    </>
+    </AuthProvider>
   );
 }
